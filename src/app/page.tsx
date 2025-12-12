@@ -1,5 +1,13 @@
-import { DashboardFeature } from '@/components/dashboard/dashboard-feature'
+;
+import VaultHeroSection from '@/components/VaultHeroSection';
+
 
 export default function Home() {
-  return <DashboardFeature />
+  return (
+    <>
+     
+      <VaultHeroSection />
+     
+    </>
+  );
 }
