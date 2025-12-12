@@ -24,6 +24,6 @@ export function getVaultProgramId(cluster: Cluster) {
       return new PublicKey('2NMA5xznazBaUeUXZK5vtLSJNNfDT1HBdSFc9CQqyp1w')
     case 'mainnet-beta':
     default:
-      return BASIC_PROGRAM_ID
+      return VAULT_PROGRAM_ID
   }
 }

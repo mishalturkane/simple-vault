@@ -95,7 +95,8 @@ export function VaultDashboard() {
             <div>
               <h3 className="text-2xl font-bold text-amber-800 mb-2">No Vault Found</h3>
               <p className="text-amber-700">
-                You don't have a vault yet. Click "Initialize Vault" to create one.
+                {/* Line 98: Fixed unescaped entities */}
+                You don&apos;t have a vault yet. Click &quot;Initialize Vault&quot; to create one.
               </p>
             </div>
           </div>
@@ -190,13 +191,15 @@ export function VaultInitialize() {
   const vaultData = getVaultAccount.data
   const hasVault = vaultData?.vaultExists === true
 
+  // Line 198: Fixed 'any' type
   const handleInitialize = async () => {
     try {
       setIsLoading(true)
       await initializeVault.mutateAsync()
       success("Vault initialized successfully! 🎉")
-    } catch (err: any) {
-      error(`Failed to initialize vault: ${err.message}`)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      error(`Failed to initialize vault: ${errorMessage}`)
     } finally {
       setIsLoading(false)
     }
@@ -252,6 +255,7 @@ export function VaultDeposit() {
   const vaultData = getVaultAccount.data
   const hasVault = vaultData?.vaultExists === true
 
+  // Line 266: Fixed 'any' type
   const handleDeposit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       error("Please enter a valid amount")
@@ -263,8 +267,9 @@ export function VaultDeposit() {
       await depositToVault.mutateAsync(parseFloat(amount))
       success("Deposit successful! 💰")
       setAmount('')
-    } catch (err: any) {
-      error(`Failed to deposit: ${err.message}`)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      error(`Failed to deposit: ${errorMessage}`)
     } finally {
       setIsLoading(false)
     }
@@ -340,6 +345,7 @@ export function VaultWithdraw() {
   const hasVault = vaultData?.vaultExists === true
   const maxAmount = vaultData?.balance || 0
 
+  // Line 354: Fixed 'any' type
   const handleWithdraw = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       error("Please enter a valid amount")
@@ -351,8 +357,9 @@ export function VaultWithdraw() {
       await withdrawFromVault.mutateAsync(parseFloat(amount))
       success("Withdrawal successful! 💸")
       setAmount('')
-    } catch (err: any) {
-      error(`Failed to withdraw: ${err.message}`)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      error(`Failed to withdraw: ${errorMessage}`)
     } finally {
       setIsLoading(false)
     }
@@ -420,6 +427,7 @@ export function VaultClose() {
   const vaultData = getVaultAccount.data
   const hasVault = vaultData?.vaultExists === true
 
+  // Line 434: Fixed 'any' type
   const handleClose = async () => {
     if (!confirmClose) {
       setConfirmClose(true)
@@ -431,8 +439,9 @@ export function VaultClose() {
       await closeVault.mutateAsync()
       success("Vault closed successfully! 🔒")
       setConfirmClose(false)
-    } catch (err: any) {
-      error(`Failed to close vault: ${err.message}`)
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      error(`Failed to close vault: ${errorMessage}`)
       setConfirmClose(false)
     } finally {
       setIsLoading(false)

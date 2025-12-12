@@ -12,7 +12,7 @@ import {
   VaultDashboard,
   VaultProgramInfo 
 } from './vault-ui'
-import { AppHero } from '../app-hero'
+
 import { ellipsify } from '@/lib/utils'
 
 export default function VaultFeature() {

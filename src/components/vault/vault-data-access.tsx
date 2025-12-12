@@ -10,6 +10,24 @@ import { useAnchorProvider } from '../solana/solana-provider'
 import { useTransactionToast } from '../use-transaction-toast'
 import { toast } from 'sonner'
 import * as anchor from '@coral-xyz/anchor'
+import { Program } from '@coral-xyz/anchor'
+
+// Simple types - no complex Idl definition needed
+type VaultStateAccount = {
+  vaultBump: number;
+  stateBump: number;
+};
+
+type AnchorError = {
+  message: string;
+  logs?: string[];
+  txid?: string;
+};
+
+type SolanaError = Error & {
+  logs?: string[];
+  txid?: string;
+};
 
 export function useVaultProgram() {
   const { connection } = useConnection()
@@ -44,7 +62,7 @@ export function useVaultProgram() {
     queryFn: () => connection.getParsedAccountInfo(programId),
   })
 
-  // Get user's vault account - CORRECTED
+  // Get user's vault account
   const getVaultAccount = useQuery({
     queryKey: ['vault-account', { cluster, user: provider.wallet.publicKey?.toString() }],
     queryFn: async () => {
@@ -55,9 +73,13 @@ export function useVaultProgram() {
       
       try {
         // Check vault_state account
-        let vaultStateAccount = null
+        let vaultStateAccount: VaultStateAccount | null = null
         try {
-          vaultStateAccount = await program.account.vaultState.fetch(vaultStatePDA)
+          const accountData = await (program.account as any).vaultState.fetch(vaultStatePDA)
+          vaultStateAccount = {
+            vaultBump: accountData.vaultBump ?? accountData.vault_bump,
+            stateBump: accountData.stateBump ?? accountData.state_bump
+          }
         } catch {
           vaultStateAccount = null
         }
@@ -96,17 +118,23 @@ export function useVaultProgram() {
       const vaultPDA = getVaultPDA(provider.wallet.publicKey)
       const vaultStatePDA = getVaultStatePDA(provider.wallet.publicKey)
       
-      return program.methods
+      // Create accounts object
+      const accounts = {
+        user: provider.wallet.publicKey,
+        vault_state: vaultStatePDA,
+        vault: vaultPDA,
+        systemProgram: SystemProgram.programId,
+      }
+      
+      // Use program methods with type assertion
+      const tx = await (program.methods as any)
         .initialize()
-        .accounts({
-          user: provider.wallet.publicKey,
-          vaultState: vaultStatePDA,
-          vault: vaultPDA,
-          systemProgram: SystemProgram.programId,
-        })
+        .accounts(accounts)
         .rpc()
+      
+      return tx as string
     },
-    onSuccess: async (signature) => {
+    onSuccess: async (signature: string) => {
       transactionToast(signature)
       
       // Wait for confirmation
@@ -121,8 +149,9 @@ export function useVaultProgram() {
       
       toast.success("Vault initialized successfully! 🎉")
     },
-    onError: (error: any) => {
-      toast.error(`Failed to initialize vault: ${error.message}`)
+    onError: (error: Error | AnchorError | SolanaError) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      toast.error(`Failed to initialize vault: ${errorMessage}`)
       console.error('Initialize error:', error)
     },
   })
@@ -137,17 +166,21 @@ export function useVaultProgram() {
       const vaultStatePDA = getVaultStatePDA(provider.wallet.publicKey)
       const lamports = Math.floor(amount * LAMPORTS_PER_SOL)
       
-      return program.methods
+      const accounts = {
+        user: provider.wallet.publicKey,
+        vault_state: vaultStatePDA,
+        vault: vaultPDA,
+        systemProgram: SystemProgram.programId,
+      }
+      
+      const tx = await (program.methods as any)
         .deposit(new anchor.BN(lamports))
-        .accounts({
-          user: provider.wallet.publicKey,
-          vaultState: vaultStatePDA,
-          vault: vaultPDA,
-          systemProgram: SystemProgram.programId,
-        })
+        .accounts(accounts)
         .rpc()
+      
+      return tx as string
     },
-    onSuccess: async (signature) => {
+    onSuccess: async (signature: string) => {
       transactionToast(signature)
       await connection.confirmTransaction(signature, 'confirmed')
       
@@ -159,8 +192,9 @@ export function useVaultProgram() {
       
       toast.success("Deposit successful! 💰")
     },
-    onError: (error: any) => {
-      toast.error(`Failed to deposit: ${error.message}`)
+    onError: (error: Error | AnchorError | SolanaError) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      toast.error(`Failed to deposit: ${errorMessage}`)
     },
   })
 
@@ -174,17 +208,21 @@ export function useVaultProgram() {
       const vaultStatePDA = getVaultStatePDA(provider.wallet.publicKey)
       const lamports = Math.floor(amount * LAMPORTS_PER_SOL)
       
-      return program.methods
+      const accounts = {
+        user: provider.wallet.publicKey,
+        vault_state: vaultStatePDA,
+        vault: vaultPDA,
+        systemProgram: SystemProgram.programId,
+      }
+      
+      const tx = await (program.methods as any)
         .withdraw(new anchor.BN(lamports))
-        .accounts({
-          user: provider.wallet.publicKey,
-          vaultState: vaultStatePDA,
-          vault: vaultPDA,
-          systemProgram: SystemProgram.programId,
-        })
+        .accounts(accounts)
         .rpc()
+      
+      return tx as string
     },
-    onSuccess: async (signature) => {
+    onSuccess: async (signature: string) => {
       transactionToast(signature)
       await connection.confirmTransaction(signature, 'confirmed')
       
@@ -196,8 +234,9 @@ export function useVaultProgram() {
       
       toast.success("Withdrawal successful! 💸")
     },
-    onError: (error: any) => {
-      toast.error(`Failed to withdraw: ${error.message}`)
+    onError: (error: Error | AnchorError | SolanaError) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      toast.error(`Failed to withdraw: ${errorMessage}`)
     },
   })
 
@@ -210,17 +249,21 @@ export function useVaultProgram() {
       const vaultPDA = getVaultPDA(provider.wallet.publicKey)
       const vaultStatePDA = getVaultStatePDA(provider.wallet.publicKey)
       
-      return program.methods
+      const accounts = {
+        user: provider.wallet.publicKey,
+        vault_state: vaultStatePDA,
+        vault: vaultPDA,
+        systemProgram: SystemProgram.programId,
+      }
+      
+      const tx = await (program.methods as any)
         .close()
-        .accounts({
-          user: provider.wallet.publicKey,
-          vaultState: vaultStatePDA,
-          vault: vaultPDA,
-          systemProgram: SystemProgram.programId,
-        })
+        .accounts(accounts)
         .rpc()
+      
+      return tx as string
     },
-    onSuccess: async (signature) => {
+    onSuccess: async (signature: string) => {
       transactionToast(signature)
       await connection.confirmTransaction(signature, 'confirmed')
       
@@ -232,8 +275,9 @@ export function useVaultProgram() {
       
       toast.success("Vault closed successfully! 🔒")
     },
-    onError: (error: any) => {
-      toast.error(`Failed to close vault: ${error.message}`)
+    onError: (error: Error | AnchorError | SolanaError) => {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      toast.error(`Failed to close vault: ${errorMessage}`)
     },
   })
 
