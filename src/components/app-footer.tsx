@@ -15,7 +15,7 @@ export function AppFooter() {
       <div className="text-muted-foreground">
 
 
-        © {new Date().getFullYear()} counter dapp. All rights reserved.
+        © {new Date().getFullYear()} vault. All rights reserved.
 
 
       </div>
