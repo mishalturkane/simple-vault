@@ -13,7 +13,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
   const [showMenu, setShowMenu] = useState(false)
 
   function isActive(path: string) {
-    return path === '/' ? pathname === '/' : pathname.startsWith(path)
+    return path === '/vault' ? pathname === '/vault' : pathname.startsWith(path)
   }
 
   return (
@@ -21,9 +21,7 @@ export function AppHeader({ links = [] }: { links: { label: string; path: string
       <header className="relative z-50 mx-26 px-4 py-2 mt-4">
         <div className="mx-auto flex justify-between items-center">
           <div className="flex items-baseline gap-4">
-            <Link className="text-xl font-bold hover:text-neutral-500   dark:hover:text-white " href="/">
-              <span>Legacy Vault</span>
-            </Link>
+           
             <div className="hidden md:flex items-center">
               <ul className="flex gap-4 flex-nowrap items-center">
                 {links.map(({ label, path }) => (

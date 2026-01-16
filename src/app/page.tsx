@@ -1,13 +1,5 @@
-;
-import VaultHeroSection from '@/components/VaultHeroSection';
-
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <>
-     
-      <VaultHeroSection />
-     
-    </>
-  );
+  redirect('/vault');
 }
